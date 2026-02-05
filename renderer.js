@@ -20,6 +20,10 @@ const waterStatus = document.getElementById("waterStatus");
 const allowWaterInput = document.getElementById("allowWater");
 const eventBubble = document.getElementById("eventBubble");
 const eventSprite = document.getElementById("eventSprite");
+const eventFrequencyInput = document.getElementById("eventFrequency");
+const eventPicnicInput = document.getElementById("eventPicnic");
+const eventChatInput = document.getElementById("eventChat");
+const eventMonsterInput = document.getElementById("eventMonster");
 
 let waterLayer = null;
 let waterPolygons = [];
@@ -87,6 +91,20 @@ function pointInWater(latlng) {
     }
   }
   return false;
+}
+
+function getEnabledEvents() {
+  return events.filter((event) => {
+    if (event.id === "picnic") return eventPicnicInput.checked;
+    if (event.id === "chat") return eventChatInput.checked;
+    if (event.id === "monster") return eventMonsterInput.checked;
+    return false;
+  });
+}
+
+function nextEventDelay() {
+  const base = Number(eventFrequencyInput.value);
+  return base * (0.7 + Math.random() * 0.6);
 }
 
 function findSafeLatLng(baseCenter, tValue) {
@@ -234,13 +252,20 @@ function animate(timestamp) {
   sprite.style.top = `${point.y}px`;
   sprite.classList.toggle("scuba", needsScuba);
 
-  if (timestamp >= eventUntil && travelClock >= nextEventAt) {
-    const event = events[Math.floor(Math.random() * events.length)];
+  const enabledEvents = getEnabledEvents();
+  if (!enabledEvents.length) {
+    currentEvent = null;
+    eventBubble.classList.add("hidden");
+    eventSprite.classList.add("hidden");
+  }
+
+  if (enabledEvents.length && timestamp >= eventUntil && travelClock >= nextEventAt) {
+    const event = enabledEvents[Math.floor(Math.random() * enabledEvents.length)];
     currentEvent = event;
     eventUntil = timestamp + event.durationMs;
     pauseUntil = Math.max(pauseUntil, eventUntil);
     travelClock = 0;
-    nextEventAt = 8 + Math.random() * 10;
+    nextEventAt = nextEventDelay();
   }
 
   if (currentEvent) {
@@ -279,7 +304,24 @@ spacingInput.addEventListener("input", () => drawSpiral(map.getCenter()));
 
 spriteSizeInput.addEventListener("input", setSpriteSize);
 
+eventFrequencyInput.addEventListener("input", () => {
+  nextEventAt = nextEventDelay();
+});
+
+eventPicnicInput.addEventListener("change", () => {
+  currentEvent = null;
+});
+
+eventChatInput.addEventListener("change", () => {
+  currentEvent = null;
+});
+
+eventMonsterInput.addEventListener("change", () => {
+  currentEvent = null;
+});
+
 resizeOverlay();
 setSpriteSize();
+nextEventAt = nextEventDelay();
 fetchWater();
 requestAnimationFrame(animate);
