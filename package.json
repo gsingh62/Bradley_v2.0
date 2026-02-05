@@ -1,0 +1,17 @@
+{
+  "name": "Bradley_v2.0",
+  "version": "0.1.0",
+  "description": "Desktop app: sprite follows Archimedean spiral on a real map while avoiding water bodies",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^30.0.0",
+    "leaflet": "^1.9.4",
+    "osmtogeojson": "^3.0.0-beta.5",
+    "@turf/turf": "^6.5.0"
+  }
+}
